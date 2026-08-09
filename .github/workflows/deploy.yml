@@ -21,8 +21,20 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          new: ${{ secrets.new }}
 
-      - run: zip -r dist.zip dist
+      - name: Zip build output
+        run: |
+          for dir in dist build out; do
+            if [ -d "$dir" ]; then
+              echo "Found build output directory: $dir"
+              zip -r dist.zip "$dir"
+              exit 0
+            fi
+          done
+          echo "No build output directory found (looked for: dist, build, out). Check where your build command writes its output." >&2
+          exit 1
 
       - name: Get presigned upload URL
         id: get-upload-url
